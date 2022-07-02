@@ -39,7 +39,7 @@ class Model extends databaseDataTypes{
         "name" => "",
         "type" => NULL,
         "length" => 10,
-        "default" => NULL,
+        "default" => "",
         "key" => "",
         "null" => true,
         "auto_increment" => false,
@@ -63,7 +63,7 @@ class Model extends databaseDataTypes{
             "length" => 10,
             "extra" => "AUTO_INCREMENT",
             "null" => false,
-            "default" => NULL,
+            "default" => "",
             "unique" => true,
             "protected" => false
         ];
