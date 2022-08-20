@@ -33,9 +33,6 @@ class router extends \routes{
         $variables = [];
         $level = 0; 
         foreach($URIComps as $URIComp){
-            if($level > 0 && $URIComp == ""){
-                break;	
-            }
             foreach(self::getRouteList() as $route=>$controller){
                 $routeComps = explode("/", $route); 
                 if($routeComps[0] == ""){

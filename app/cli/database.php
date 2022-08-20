@@ -58,10 +58,6 @@ class database{
                         $report["default"] = ($a["default"] === $b["Default"] || 
                                             $a["default"] === "" && $b["Default"] === NULL);
                         $report["key"] = ($a["key"] === $b["Key"]);
-                        // echo "----".PHP_EOL;
-                        // echo $a["key"].PHP_EOL;
-                        // echo $b["Key"].PHP_EOL;
-                        
                         $report["extra"] = (strtoupper($a["extra"]) === strtoupper($b["Extra"]));
                     }
                 }

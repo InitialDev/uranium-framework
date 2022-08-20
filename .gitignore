@@ -1,3 +1,5 @@
 /vendor
 .env
 *.swp
+env.php
+database

@@ -31,4 +31,8 @@ class userHandler{
     public static function getUser($uid){
 
     }
+
+    public static function status(){
+        return true;
+    }
 }
