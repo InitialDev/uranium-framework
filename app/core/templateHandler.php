@@ -5,7 +5,6 @@ namespace uranium\core;
 class templateHandler{
 
     private static $viewpath = __DIR__."/../../views/";
-    private static $templateDir = __DIR__."/../../views/templates/";
 
     public static function getContent($VIEWNAME, $VARIABLES){
         $viewpath = self::$viewpath;
@@ -37,14 +36,16 @@ class templateHandler{
     }
 
     public static function renderTemplate($newData){
-        $templateDir = self::$templateDir;
-        $templateEx = "/\@[template]+\([\"\'][a-zA-Z0-9\/]+[\"\']\)/";
+        $templateEx = "/\@[template]+\([\"\'][a-zA-Z0-9\/\_\.\-]+[\"\']\)/";
         preg_match($templateEx, $newData, $match);
         if(count($match) > 0){
             $template = $match[0];
-            preg_match("/[\"\'][a-zA-Z0-9\/]+[\"\']/", $template, $templateFile);
+            preg_match("/[\"\'][a-zA-Z0-9\/\-\_\.]+[\"\']/", $template, $templateFile);
+			if(count($templateFile) <= 0){
+				return "Template path \"".$template."\" not found"; // ToDo: Error page
+			};
             $filename =  substr($templateFile[0], 1, strlen($templateFile[0])-2);
-            $fileLoc = $templateDir.$filename.'.template.php';
+            $fileLoc = self::$viewpath.$filename;
             $templaterawcontent = file_get_contents($fileLoc);
             $templateContent = self::insertIncludes($templaterawcontent);
             $readyForData = str_replace($template, "", $newData);
@@ -56,12 +57,12 @@ class templateHandler{
     }
 
     private static function insertIncludes($CONTENT){
-        $insertEx = "/\@[include]+\([\"\'][a-zA-Z0-9\/]+[\"\']\)/";
+        $insertEx = "/\@[include]+\([\"\'][a-zA-Z0-9\-\_\/\.]+[\"\']\)/";
         preg_match_all($insertEx, $CONTENT, $inclusions);
         foreach($inclusions[0] as $include){
-            preg_match("/[\"\'][a-zA-Z0-9\/]+[\"\']/", $include, $includeFile);
+            preg_match("/[\"\'][a-zA-Z0-9\/\_\-\.]+[\"\']/", $include, $includeFile);
             $fileRelPath = substr($includeFile[0], 1, strlen($includeFile[0])-2);
-            $fileLoc = self::$viewpath.$fileRelPath.'.inc.php';
+            $fileLoc = self::$viewpath.$fileRelPath;
             $fileContent = file_get_contents($fileLoc);
             $includeIncludes = self::insertIncludes($fileContent);
             $CONTENT = str_replace($include, $includeIncludes, $CONTENT);

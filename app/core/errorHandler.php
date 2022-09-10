@@ -4,16 +4,20 @@ namespace uranium\core;
 
 class errorHandler{
     public static function log_error( $num, $str, $file, $line, $context = null ){
-        log_exception( new ErrorException( $str, 0, $num, $file, $line ) );
+		self::handleError( new \ErrorException($str, 0 , $num, $file, $line));
     }
+
+	public static function log_exception($num){
+		self::handleError(new \ErrorException($str, 0, $num, $file, $line));
+	}
     
-    public static function log_exception( $e ){
+    public static function handleError( $str ){
         error_log("An error!");
-        echo($e);
-        error_log($e);
+		echo("AN ERROR!<br />");
+        echo(str_replace(PHP_EOL, '<br />', $str));
+        error_log($str);
         echo "<br />";
         echo "<br />";
-       
         exit();
     }
     
