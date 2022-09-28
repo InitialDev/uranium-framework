@@ -1,5 +1,7 @@
 {
     "name": "initialdev/uranium-framework",
+    "description": "Uranium PHP Framework",
+    "license": "proprietary",
     "type": "project",
     "autoload": {
         "classmap": [
