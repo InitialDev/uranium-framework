@@ -20,6 +20,8 @@ class databaseDataTypes{
 
 class Model extends databaseDataTypes{
 
+    public Bool $test = false; // set to test to not run query
+
     public $cols = array();  	// Array of data columns
     public $rows = array(); 	// Array of data from database
     protected $tableName;	
@@ -109,11 +111,27 @@ class Model extends databaseDataTypes{
     }
 
     /**
+     * Add where selector to a query but with array of wheres
+     * @param Array - array of keys as db key and value as db value
+     * @return model this
+     */
+    public function whereAnd(Array $attributes): Model{
+        foreach($attributes as $key => $value){
+            $this->where($key, $value);
+        };
+        return $this;
+    }
+
+    public function getSelectors(): Array{
+        return $this->query["selectors"];
+    }
+
+    /**
      * add a limit to ammount of rows to fetch
-     * @param Int limit to rows
+     * @param Integer limit to rows
      * @return model object
      */
-    public function limit(Int $limit): Model{
+    public function limit(Integer $limit): Model{
         $this->query["limit"] = $limit;
         return $this;
     }
@@ -123,9 +141,9 @@ class Model extends databaseDataTypes{
      * @param String name of class
      * @param String name of foreign key
      * @param Strin gname of local key
-     * @return array
+     * @return Array
      */
-    private function setupRelationship($className, $foreignKey, $localKey): array{
+    private function setupRelationship(String $className, String $foreignKey, String $localKey): Array{
         $defaultForeignKey = $this->tableName."_id";
         $class = new $className();
         $newRelationship = [
@@ -188,9 +206,8 @@ class Model extends databaseDataTypes{
      * Fetch item in database
      * @return mixed
      */
-    public function get(): array{
+    public function get(): Mixed{
         $tableName = $this->tableName;
-        $database = db::getInstance();
         $sql = "SELECT ";
         $cols = $this->getColumnNames();
         foreach($cols as $key=>$col){
@@ -211,22 +228,27 @@ class Model extends databaseDataTypes{
         if(key_exists("limit", $this->query)){
             $sql .= " LIMIT ".$this->query["limit"];
         }
-        $query = $database->prepare($sql);
-        if($query->execute()){
-            while($row = $query->fetch(PDO::FETCH_ASSOC)){
-                // Get relationships
-                if(count($this->query["relationships"]) > 0){
-                    foreach($this->query["relationships"] as $r){
-                        $relationshipModel = $r["class"];
-                        $results = $relationshipModel->where($r["foreignKey"], $row[$r["localKey"]])->get();
-                        $row[$relationshipModel->tableName] = $results;
+        if(!$this->test){
+            $database = db::getInstance();
+            $query = $database->prepare($sql);
+            if($query->execute()){
+                while($row = $query->fetch(PDO::FETCH_ASSOC)){
+                    // Get relationships
+                    if(count($this->query["relationships"]) > 0){
+                        foreach($this->query["relationships"] as $r){
+                            $relationshipModel = $r["class"];
+                            $results = $relationshipModel->where($r["foreignKey"], $row[$r["localKey"]])->get();
+                            $row[$relationshipModel->tableName] = $results;
+                        }
                     }
+                    $this->rows[] = $row;
                 }
-                $this->rows[] = $row;
-            }
-            return $this->rows;
+                return $this->rows;
+            }else{
+                return [];
+            };
         }else{
-            return [];
+            return $sql;
         };
     }
 

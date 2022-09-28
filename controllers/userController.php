@@ -24,6 +24,10 @@ class userController{
         echo json_encode($result);
     }
 
+    public static function whereAndTest(){
+        
+    }
+
     public static function createUser(){
         $model = new UserModel();
         $newUser = [
