@@ -40,6 +40,7 @@ class userController{
             $result= $model->save();
             echo "{\"result\":true}";
         }catch(PDOException $e){
+            error_log($e);
             echo "{\"result\":false}";
         }
     }

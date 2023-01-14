@@ -33,6 +33,6 @@ class UserModel extends Model{
         ]); 
     }	
     public function userDetails(){
-        $this->hasOne(UserDetailsModel::class);
+        $this->hasOne(UserDetailsModel::class, "user_id", "id");
     }
 }

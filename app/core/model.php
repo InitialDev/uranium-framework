@@ -131,7 +131,7 @@ class Model extends databaseDataTypes{
      * @param Integer limit to rows
      * @return model object
      */
-    public function limit(Integer $limit): Model{
+    public function limit(int $limit): Model{
         $this->query["limit"] = $limit;
         return $this;
     }
@@ -206,7 +206,7 @@ class Model extends databaseDataTypes{
      * Fetch item in database
      * @return mixed
      */
-    public function get(): Mixed{
+    public function get(){
         $tableName = $this->tableName;
         $sql = "SELECT ";
         $cols = $this->getColumnNames();
@@ -316,6 +316,7 @@ class Model extends databaseDataTypes{
             return true;
         }catch(PDOException $e){
             $database->rollBack(); // We messed up, go back.
+            error_log($e);
             return false;
         }
     }

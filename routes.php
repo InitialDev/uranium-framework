@@ -9,6 +9,7 @@ class routes{
     public static $get_routes=[
         "/" => "exampleController@modelExample",
         "/user" => "exampleController@userexample",
+        "/login" => "pageController@login",
         "/test/{item_test}" => "exampleController@variableExample",
         "/test/{item_test}/test" => "exampleController@variableExtension",
         "/test/{item_test}/test/{seconditem}" => "exampleController@twoVariables"
