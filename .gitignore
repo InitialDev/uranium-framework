@@ -4,3 +4,7 @@
 env.php
 database
 composer.lock
+node_modules
+public/core.dist.js
+package-lock.json
+npm-debug.log
