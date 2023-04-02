@@ -1,10 +1,8 @@
 {
-  "name": "fov2",
+  "name": "Uranium Framework",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "My Uranium Website",
   "scripts": {
-    "start": "npx electron .",
     "build": "npx webpack --config webpack.config.js",
     "watch": "npx webpack --config webpack.config.js --watch",
     "dev": "npm run build",
@@ -19,9 +17,6 @@
     "babel-loader": "^8.2.5",
     "bootstrap": "^5.2.3",
     "css-loader": "^6.7.2",
-    "electron": "^21.2.2",
-    "electron-packager": "^17.1.1",
-    "file-loader": "^6.2.0",
     "mini-css-extract-plugin": "^2.6.1",
     "postcss-loader": "^7.0.1",
     "react": "^18.2.0",
@@ -35,8 +30,5 @@
     "webpack": "^5.75.0",
     "webpack-cli": "^4.10.0",
     "chart.js": "^4.0.1"
-  },
-  "dependencies": {
-    "npm": "^9.6.3"
   }
 }
