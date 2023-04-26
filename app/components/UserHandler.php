@@ -1,13 +1,13 @@
 <?php
 
-namespace uranium\core;
+namespace uranium\component;
 
 use uranium\config\db;
 use EmailValidation\EmailValidatorFactory as emailValidator;
 use uranium\boiler\enc;
 use \PDO;
 
-class userHandler{
+class UserHandler{
     public static function authenticate($username, $password){
         
     }

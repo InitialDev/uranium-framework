@@ -1,7 +1,7 @@
 <?php
 namespace uranium\core;
 
-class classHelper{
+class ClassHelper{
 
     // Get class list for given directory
     public static function getClassNamesFromDir($dir){

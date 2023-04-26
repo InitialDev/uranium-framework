@@ -1,10 +1,10 @@
 <?php
 
-use uranium\core\pageHandler;
-use uranium\core\userHandler;
-use uranium\core\encryptionEngine;
-use uranium\model\exampleModel;
-use uranium\model\userModel;
+use uranium\core\PageHandler;
+use uranium\component\UserHandler;
+use uranium\core\EncryptionHelper;
+use uranium\model\ExampleModel;
+use uranium\model\UserModel;
 
 class exampleController{
     

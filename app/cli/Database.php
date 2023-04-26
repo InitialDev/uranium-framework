@@ -2,11 +2,11 @@
 
 namespace uranium\cli;
 
-use uranium\core\classHelper;
-use uranium\cli\cliHelper;
-use uranium\cli\cliColour;
+use uranium\core\core\ClassHelper;
+use uranium\core\cli\CliHelper;
+use uranium\core\cli\CliColour;
 
-class database{
+class Database{
     /**
      * Delete and recreate the tables from the models
      * @return void
@@ -27,7 +27,7 @@ class database{
             $modelObj->create();
             unset($modelObj); // Destroy finished object
         }
-        echo cliColour::GREEN."[*] Completed without error".cliColour::RESET.PHP_EOL;
+        echo CliColour::GREEN."[*] Completed without error".CliColour::RESET.PHP_EOL;
     }
 
     /**
@@ -79,21 +79,21 @@ class database{
                         for($i = 0; $i < $spaceBetween; $i++){
                             echo " ";
                         }
-                        echo $checkResult?cliColour::GREEN:cliColour::RED;
+                        echo $checkResult?CliColour::GREEN:CliColour::RED;
                         echo " ".$resultText;
-                        echo cliColour::RESET;
+                        echo CliColour::RESET;
                         echo PHP_EOL;
                     }
                     echo PHP_EOL;
                 }
             }
             if($errors > 0){
-                echo cliColour::RED;
+                echo CliColour::RED;
             }else{
-                echo cliColour::GREEN;
+                echo CliColour::GREEN;
             }
             echo "Test finished with $errors error(s)".PHP_EOL;
-            echo cliColour::RESET;
+            echo CliColour::RESET;
             echo PHP_EOL;
         }else{
             echo $tableResult;

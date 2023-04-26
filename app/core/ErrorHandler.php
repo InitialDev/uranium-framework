@@ -2,7 +2,7 @@
 
 namespace uranium\core;
 
-class errorHandler{
+class ErrorHandler{
     public static function log_error( $num, $str, $file, $line, $context = null ){
 		self::handleError( new \ErrorException($str, 0 , $num, $file, $line));
     }
