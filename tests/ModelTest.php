@@ -2,7 +2,7 @@
 use PHPUnit\Framework\TestCase;
 
 require(__DIR__."/../app/core/Model.php");
-require(__DIR__."/../models/userModel.php");
+require(__DIR__."/../models/UserModel.php");
 
 use uranium\core\Model;
 use uranium\model\UserModel;
