@@ -1,7 +1,6 @@
 <?php
 
-$_CONFIG = []; // setup new superglobal
-global $_CONFIG;
+
 
 require __DIR__."/app/app.php";
 
@@ -17,7 +16,7 @@ set_error_handler(array('uranium\core\ErrorHandler', 'log_error'));
 ini_set("display_errors", "off");
 error_reporting(E_ALL);
 
-$config = new ConfigHandler(__DIR__."/.env");
+//$config = new ConfigHandler(__DIR__."/.env");
 
 ScriptLoader::folder(__DIR__."/scripts");
 router::init();

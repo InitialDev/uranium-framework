@@ -5,12 +5,23 @@ namespace uranium\core;
 class ConfigHandler{
 
     private $_PATH = "";
+    private $_CONFIG = [];
+    
+    private static $instance = null;
 
-    public function __construct($config){
-        $this->loadConfig($config);
+    private function __construct(){
+        $configPath = $_SERVER['URANIUM_ENV_CONFIG_PATH'];
+        $this->loadConfig($configPath);
     }
 
-    protected function loadConfig($path){
+    public function getValue($key): string{
+        if(array_key_exists($key, $this->_CONFIG)){
+            return $this->_CONFIG[$key];
+        }
+        return null;
+    }
+
+    private function loadConfig($path){
         $content = $this->getFileContent($path);
         $configLines = preg_split("/\r\n|\n|\r/", $content); 
         foreach($configLines as $line){
@@ -18,10 +29,9 @@ class ConfigHandler{
             $notComment = $splitComment[0];
             if(!empty($notComment)){
                 $splitItem = explode("=", $notComment);
-                global $_CONFIG;
-                $_CONFIG[$splitItem[0]] = $splitItem[1];
-            }
-        }
+                $this->_CONFIG[stripslashes(trim($splitItem[0]))] = trim($splitItem[1]);
+            };
+        };
     }
 
     private function getFileContent($path){
@@ -33,5 +43,12 @@ class ConfigHandler{
             return "";
         };
         return $content;
+    }
+
+    public static function getInstance(){
+        if(self::$instance == null){
+            self::$instance = new ConfigHandler();
+        };
+        return self::$instance;
     }
 }

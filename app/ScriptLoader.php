@@ -14,6 +14,7 @@ class ScriptLoader{
         };
         if(file_exists($FILEPATH)){
             require_once($FILEPATH);
+            //error_log("[*] Loaded file ".$FILEPATH);
             return true;
         }else{
             return false;
@@ -34,6 +35,7 @@ class ScriptLoader{
             foreach($filesToInclude as $file){
                 if(!is_dir($FOLDERPATH.'/'.$file)){
                     require_once($FOLDERPATH.'/'.$file);
+                    //error_log("[*] Laoded file ".$file);
                 }
             }
             return true;
