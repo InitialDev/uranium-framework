@@ -1,12 +1,12 @@
 <?php
 
-namespace uranium\cli;
+namespace uranium\core\cli;
 
-use uranium\cli\cliColour;
+use uranium\core\cli\CliColour;
 
-class cliHelper{
+class CliHelper{
     public static function confirmation(String $warning, Bool $continueByDefault = false){
-        echo cliColour::YELLOW;
+        echo CliColour::YELLOW;
         echo PHP_EOL;
         echo $warning.PHP_EOL;
         echo "Are you sure you want to continue? ";
@@ -15,13 +15,13 @@ class cliHelper{
         $confirmation = trim($confirmation);
         if($confirmation !== "y" && $confirmation !== "Y"){
             if($confirmation === "" && !$continueByDefault){
-                echo cliColour::RED;
+                echo CliColour::RED;
                 echo "[*] Aborting".PHP_EOL;
-                echo cliColour::RESET;
+                echo CliColour::RESET;
                 exit();
             };
         };
         echo PHP_EOL;
-        echo cliColour::RESET;
+        echo CliColour::RESET;
     }
 }

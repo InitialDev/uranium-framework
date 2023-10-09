@@ -2,7 +2,7 @@
 
 namespace uranium\core;
 
-class encryptionEngine{
+class EncryptionHelper{
     public static function generateHash($value){
         $options = [
             "salt" => $_ENV['PWD_SALT'],

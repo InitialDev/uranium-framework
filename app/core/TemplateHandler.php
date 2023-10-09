@@ -2,7 +2,7 @@
 
 namespace uranium\core;
 
-class templateHandler{
+class TemplateHandler{
 
     private static $viewpath = __DIR__."/../../views/";
 
@@ -42,7 +42,7 @@ class templateHandler{
             $template = $match[0];
             preg_match("/[\"\'][a-zA-Z0-9\/\-\_\.]+[\"\']/", $template, $templateFile);
 			if(count($templateFile) <= 0){
-				return "Template path \"".$template."\" not found"; // ToDo: Error page
+				throw new ErrorException("Template path \"".$template."\" not found");
 			};
             $filename =  substr($templateFile[0], 1, strlen($templateFile[0])-2);
             $fileLoc = self::$viewpath.$filename;

@@ -1,9 +1,9 @@
 <?php
 namespace uranium\core;
 
-use uranium\core\templateHandler;
+use uranium\core\TemplateHandler;
 
-class pageHandler{
+class PageHandler{
     
     public static function raw($text){
         self::render($text);

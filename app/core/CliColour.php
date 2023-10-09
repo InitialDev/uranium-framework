@@ -1,8 +1,8 @@
 <?php
 
-namespace uranium\cli;
+namespace uranium\core\cli;
 
-class cliColour{
+class CliColour{
     public const BLACK 			= "\e[0;30m";
     public const GREY 			= "\e[1;30m";
     public const RED 			= "\e[0;31m";

@@ -1,7 +1,7 @@
 <?php
 
-use uranium\core\pageHandler;
-use uranium\core\encryptionEngine;
+use uranium\core\PageHandler;
+use uranium\core\EncryptionHandler;
 use uranium\model\UserModel;
 use uranium\model\UserDetailsModel;
 

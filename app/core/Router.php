@@ -1,7 +1,7 @@
 <?php
 namespace uranium\core;
 
-class router extends \routes{
+class Router extends \routes{
 
     public static function init(){
         $route = self::getRoute();

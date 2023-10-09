@@ -1,7 +1,6 @@
 /vendor
 .env
 *.swp
-env.php
 database
 composer.lock
 node_modules

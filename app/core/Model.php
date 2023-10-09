@@ -7,18 +7,18 @@
 
 namespace uranium\core;
 
-use uranium\database\db;
+use uranium\component\Database;
 use \PDO;
 use Throwable;
 
-class databaseDataTypes{
+class DatabaseDataTypes{
     public const VARCHAR = ["ID" => "VARCHAR", "MAX" => 255];
     public const INTEGER = ["ID" => "INT", "MAX" => 100];
     public const BOOLEAN = ["ID" => "BOOL", "MAX" => 1];
     public const TEXT    = ["ID" => "TEXT", "MAX" => 2000];
 }
 
-class Model extends databaseDataTypes{
+class Model extends DatabaseDataTypes{
 
     public Bool $test = false; // set to test to not run query
 
@@ -229,7 +229,7 @@ class Model extends databaseDataTypes{
             $sql .= " LIMIT ".$this->query["limit"];
         }
         if(!$this->test){
-            $database = db::getInstance();
+            $database = Database::getInstance();
             $query = $database->prepare($sql);
             if($query->execute()){
                 while($row = $query->fetch(PDO::FETCH_ASSOC)){
@@ -276,7 +276,7 @@ class Model extends databaseDataTypes{
         };
         $pkn = $this->pkn;
         $tableName = $this->tableName;
-        $database = db::getInstance();
+        $database = Database::getInstance();
         $database->beginTransaction();
         foreach($this->rows as $row){
             $template = "";
@@ -354,7 +354,7 @@ class Model extends databaseDataTypes{
         }
         $template .= "PRIMARY KEY(".$pkName.")";
         $template .= ")";
-        $database = db::getInstance();
+        $database = Database::getInstance();
         $query = $database->prepare($template);
         if($query->execute()){
             return true;
@@ -368,7 +368,7 @@ class Model extends databaseDataTypes{
      * @return Boolean 
      */
     public function exists(): bool{
-        $database = db::getInstance();
+        $database = Database::getInstance();
         $query = $database->prepare("DESCRIBE ".$this->tableName);
         try{
             $query->execute();
@@ -384,7 +384,7 @@ class Model extends databaseDataTypes{
      * @return Boolean
      */
     public function drop(): bool{
-        $database = db::getInstance();
+        $database = Database::getInstance();
         $tableName = $this->tableName;
         $sql = "DROP TABLE IF EXISTS `$tableName`;";
         $query = $database->prepare($sql);
@@ -400,7 +400,7 @@ class Model extends databaseDataTypes{
      * @return Mixed
      */
     public function getExistingColumns(): mixed{
-        $database = db::getInstance();
+        $database = Database::getInstance();
         $tableName = $this->tableName;
         $query = $database->prepare("SHOW COLUMNS FROM $tableName;");
         $rows = [];

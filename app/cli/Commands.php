@@ -2,7 +2,7 @@
 
 namespace uranium\cli;
 
-class commands{
+class Commands{
     public static function list(){
         
     }

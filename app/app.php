@@ -1,13 +1,13 @@
 <?php
 
-require_once(__DIR__."/scriptloader.php");
+require_once(__DIR__."/ScriptLoader.php");
 
-use uranium\scriptloader;
+use uranium\ScriptLoader;
 
-scriptloader::file(__DIR__."/../env.php");
-scriptloader::file(__DIR__."/../routes.php");
-scriptloader::folder(__DIR__."/core");
-scriptloader::folder(__DIR__."/cli");
-scriptloader::folder(__DIR__."/scripts");
-scriptloader::folder(__DIR__."/../models");
-scriptloader::folder(__DIR__."/../controllers");
+ScriptLoader::file(__DIR__."/../env.php");
+ScriptLoader::file(__DIR__."/../routes.php");
+ScriptLoader::folder(__DIR__."/core");
+ScriptLoader::folder(__DIR__."/cli");
+ScriptLoader::folder(__DIR__."/components");
+ScriptLoader::folder(__DIR__."/../models");
+ScriptLoader::folder(__DIR__."/../controllers");
