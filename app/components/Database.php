@@ -2,6 +2,7 @@
 
 namespace uranium\component;
 
+use uranium\core\ConfigHandler;
 use \PDO;
 
 class Database {
@@ -10,12 +11,13 @@ class Database {
     private function __clone() {}
     
     public static function getInstance() {
-        global $_CONFIG;
         if(!self::$objInstance){
-            $db_host = $_CONFIG["db_host"];
-            $db_name = $_CONFIG["db_name"];	
-            $dsn = "mysql:dbname=$db_name;host=$db_host";
-            self::$objInstance = new PDO($dsn, $_CONFIG["db_user"], $_CONFIG["db_pass"]);
+            $config = ConfigHandler::getInstance();
+            $db_host = $config->getValue("db_host");
+            $db_name = $config->getValue("db_name");
+            $db_port = $config->getValue("db_port");
+            $dsn = "mysql:dbname=$db_name;host=$db_host;port=$db_port";
+            self::$objInstance = new PDO($dsn, $config->getValue("db_user"), $config->getValue("db_pass"));
             self::$objInstance->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         }
         return self::$objInstance;
