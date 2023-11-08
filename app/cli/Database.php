@@ -2,7 +2,7 @@
 
 namespace uranium\cli;
 
-use uranium\core\core\ClassHelper;
+use uranium\core\ClassHelper;
 use uranium\core\cli\CliHelper;
 use uranium\core\cli\CliColour;
 
@@ -17,7 +17,7 @@ class Database{
         $modelList = classHelper::getClassNamesFromDir(__DIR__."/../../models");
         echo PHP_EOL;
         foreach($modelList as $model){
-            echo $model.PHP_EOL;
+            echo "[*] Found: ".$model.PHP_EOL;
         }
         cliHelper::confirmation("Recreating the database will wipe all data.", false);
         echo "[*] Starting migration".PHP_EOL;

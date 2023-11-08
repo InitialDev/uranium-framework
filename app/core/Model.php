@@ -1,10 +1,4 @@
 <?php
-/*
- * Get data
- * Save data
- * build database
- */
-
 namespace uranium\core;
 
 use uranium\component\Database;
@@ -12,10 +6,12 @@ use \PDO;
 use Throwable;
 
 class DatabaseDataTypes{
-    public const VARCHAR = ["ID" => "VARCHAR", "MAX" => 255];
-    public const INTEGER = ["ID" => "INT", "MAX" => 100];
-    public const BOOLEAN = ["ID" => "BOOL", "MAX" => 1];
-    public const TEXT    = ["ID" => "TEXT", "MAX" => 2000];
+    public const VARCHAR   = ["ID" => "VARCHAR", "MAX" => 255];
+    public const INTEGER   = ["ID" => "INT", "MAX" => 100];
+    public const BOOLEAN   = ["ID" => "BOOL", "MAX" => 1];
+    public const TEXT      = ["ID" => "TEXT", "MAX" => 2000];
+	public const FLOAT     = ["ID" => "FLOAT", "MAX" => 64, "LENGTH" => 8];
+	public const TIMESTAMP = ["ID" => "TIMESTAMP", "DEFAULT" => "CURRENT_TIMESTAMP", "LENGTH" => 6];
 }
 
 class Model extends DatabaseDataTypes{
@@ -40,11 +36,10 @@ class Model extends DatabaseDataTypes{
     private $colOptions = [
         "name" => "",
         "type" => NULL,
-        "length" => 10,
+        "length" => NULL,
         "default" => "",
         "key" => "",
         "null" => true,
-        "auto_increment" => false,
         "extra" => false,
         "unique" => false,
         "protected" => false
@@ -210,6 +205,7 @@ class Model extends DatabaseDataTypes{
         $tableName = $this->tableName;
         $sql = "SELECT ";
         $cols = $this->getColumnNames();
+        $wheres = [];
         foreach($cols as $key=>$col){
             $sql .= $col;
             if(($key+1) != count($cols)){
@@ -220,17 +216,21 @@ class Model extends DatabaseDataTypes{
         if(count($this->query["selectors"]) > 0){
             $sql .= " WHERE ";
             foreach($this->query["selectors"] as $key=>$selector){
+                $wheres[$selector["key"]] = $selector["value"];
                 if($key >= 1)
                     $sql .= " AND ";
-                $sql .= "`".$selector["key"]."`='".$selector["value"]."'";
-            }
-        }
+                $sql .= $selector["key"]." = :".$selector["key"]." ";
+            };
+        };
         if(key_exists("limit", $this->query)){
             $sql .= " LIMIT ".$this->query["limit"];
-        }
+        };
         if(!$this->test){
             $database = Database::getInstance();
             $query = $database->prepare($sql);
+            foreach($wheres as $whereKey => $whereValue){
+                $query->bindParam($whereKey, $whereValue);
+            };
             if($query->execute()){
                 while($row = $query->fetch(PDO::FETCH_ASSOC)){
                     // Get relationships
@@ -239,14 +239,47 @@ class Model extends DatabaseDataTypes{
                             $relationshipModel = $r["class"];
                             $results = $relationshipModel->where($r["foreignKey"], $row[$r["localKey"]])->get();
                             $row[$relationshipModel->tableName] = $results;
-                        }
-                    }
+                        };
+                    };
                     $this->rows[] = $row;
-                }
-                return $this->rows;
-            }else{
-                return [];
+                };
+            }
+            return $this;
+        }else{
+            return $sql;
+        };
+    }
+
+    /**
+     * Get result rows
+     * @return rows array
+     */
+    public function getResults(){
+        return $this->rows;
+    }
+
+    public function delete(){
+        $tableName = $this->tableName;
+        $sql = "DELETE FROM $tableName";
+        if(count($this->query["selectors"]) > 0){
+            $sql .= " WHERE ";
+            foreach($this->query["selectors"] as $key=>$selector){
+                $wheres[$selector["key"]] = $selector["value"];
+                if($key >= 1)
+                    $sql .= " AND ";
+                $sql .= $selector["key"]." = :".$selector["key"]." ";
             };
+        };
+        if(!$this->test){
+            $database = Database::getInstance();
+            $query = $database->prepare($sql);
+            foreach($wheres as $whereKey => $whereValue){
+                $query->bindParam($whereKey, $whereValue);
+            };
+            if($query->execute()){
+                $this->get();
+            };
+            return $this;
         }else{
             return $sql;
         };
@@ -261,8 +294,8 @@ class Model extends DatabaseDataTypes{
         foreach($this->cols as $col){
             if($this->withProtected || !$col["protected"]){
                 $cols[] = $col["name"];
-            }
-        }
+            };
+        };
         return $cols;
     }
  
@@ -279,6 +312,7 @@ class Model extends DatabaseDataTypes{
         $database = Database::getInstance();
         $database->beginTransaction();
         foreach($this->rows as $row){
+            $variables = [];
             $template = "";
             if(array_key_exists($pkn, $row)){
                 $template = "UPDATE `$tableName` SET ";
@@ -286,7 +320,8 @@ class Model extends DatabaseDataTypes{
                     if(array_key_exists($col["name"], $row)){
                         $currentKey = $col["name"];
                         $currentValue = $row[$col["name"]];
-                        $template .= "`$currentKey`='$currentValue',";
+                        $template .= "`$currentKey`=?";
+                        $variables[] = $currentValue;
                     }
                 }
                 $template = substr($template, 0, -1);
@@ -301,16 +336,18 @@ class Model extends DatabaseDataTypes{
                             $currentKey = $col["name"];
                             $currentValue = $row[$col["name"]];
                             $template .= "`$currentKey`,";
-                            $values .= "'$currentValue',";
+                            $values .= "?,";
+                            $variables[] = $currentValue;
                         }
                     }
                 }
                 $template = substr($template, 0, -1); // Remove the final comma from keys
                 $values = substr($values, 0, -1); // And on values
                 $template .= ") VALUES (".$values.");";
-            }
-            $database->exec($template);
-        }
+            };
+            $query = $database->prepare($template);
+            $query->execute($variables);
+        };
         try{
             $database->commit();
             return true;
@@ -327,7 +364,7 @@ class Model extends DatabaseDataTypes{
      */
     public function create(): bool{
         $tableName = $this->tableName;
-        $template = "CREATE TABLE $tableName(";
+        $template = "CREATE TABLE `$tableName`(";
         $pkName = "";
         foreach($this->cols as $col){
             if($col["key"] === "PRI"){
@@ -336,13 +373,34 @@ class Model extends DatabaseDataTypes{
             $null = $col["null"]?"":"NOT NULL";
             $name = $col["name"];
             $type = $col["type"]["ID"];
-            $length = $col["length"];
-            $default = $col["default"];
-            $extra = $col["extra"]?$col["extra"]:"";
+			$default = "";
+			if(array_key_exists("default", $col)){
+				$default = $col["default"];
+			}else{
+				if(array_key_exists("DEFAULT", $col["type"])){
+					$default = $col["type"]["DEFAULT"];
+				};
+			};
+			$extra = $col["extra"]?$col["extra"]:"";
 
-            $template .= "$name $type($length) $null";
+			$length = $col["length"];
+            if(is_null($length)){
+                if(array_key_exists("length", $col) && !is_null($col["length"])){
+                    $length = "(".$col["length"].")";
+                }else if(array_key_exists("LENGTH", $col["type"])){
+                    $length = "(".$col["type"]["LENGTH"].")";
+                }else if(array_key_exists("MAX", $col["type"])){
+                    $length = "(".$col["type"]["MAX"].")";
+                }else{
+                    $length = "";
+                }
+            }else{
+                $length = "(".$length.")";
+            };
+
+            $template .= "$name $type$length $null";
             if(strlen($default) > 0){
-                $template .= " default '$default' ";
+                $template .= " default $default ";
             }
             if(strlen($extra) > 0){
                 $template .= " $extra ";
@@ -402,7 +460,7 @@ class Model extends DatabaseDataTypes{
     public function getExistingColumns(): mixed{
         $database = Database::getInstance();
         $tableName = $this->tableName;
-        $query = $database->prepare("SHOW COLUMNS FROM $tableName;");
+        $query = $database->prepare("SHOW COLUMNS FROM `$tableName`;");
         $rows = [];
         if($query->execute()){
             while($row = $query->fetch(PDO::FETCH_ASSOC)){

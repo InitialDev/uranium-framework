@@ -1,7 +1,9 @@
 <?php
 namespace uranium\core;
 
-class Router extends \routes{
+use uranium\core\routes;
+
+class Router{
 
     public static function init(){
         $route = self::getRoute();
@@ -14,11 +16,13 @@ class Router extends \routes{
     }
 
     private static function getRouteList(){
-        if($_SERVER['REQUEST_METHOD'] === "GET"){
-            return self::$get_routes;
-        }else if($_SERVER['REQUEST_METHOD'] === "POST"){
-            return self::$post_routes;
-        };
+        $routeRegister = new routes();
+        $routes = $routeRegister->getRegister();
+
+        $method = $_SERVER["REQUEST_METHOD"];
+        if(array_key_exists($method, $routes)){
+            return $routes[$method];
+        }
         return [];
     }
 
@@ -33,21 +37,19 @@ class Router extends \routes{
         $variables = [];
         $level = 0; 
         foreach($URIComps as $URIComp){
-            foreach(self::getRouteList() as $route=>$controller){
-                $routeComps = explode("/", $route); 
+            foreach(self::getRouteList() as $routePath=>$route){
+                $routeComps = explode("/", $routePath); 
                 if($routeComps[0] == ""){
                     $routeComps = array_slice($routeComps, 1); // Remove empty array item
                 };
                 $routeSize = count($routeComps);
                 if($compSize != $routeSize){
-                    unset($matches[$route]);
+                    unset($matches[$routePath]);
                 }else{
-                    // Check if variable
                     $variableMatch = preg_match("/\{([a-zA-Z_]+)\}/", $routeComps[$level], $variableMatch);
-                    // Match
                     if($routeComps[$level] != $URIComp){
                         if(!$variableMatch){
-                            unset($matches[$route]);
+                            unset($matches[$routePath]);
                         }else{
                             $variableID = substr($routeComps[$level], 1, strlen($routeComps[$level]) -2); 
                             $variables[$variableID] = $URIComp;
@@ -67,10 +69,18 @@ class Router extends \routes{
         };
     }
 
-    private static function loadRoute($routeID, $variables=[]){
-        if(empty($routeID)){
-            return false;
-        }
+    private static function loadRoute($route, $variables=[]){
+
+        if($route->hasMiddleware()){
+            //error_log("Has middleware");
+           // var_dump($route->middleware);
+            foreach($route->middleware as $middlewareClassString){
+                $middlewareClass = new $middlewareClassString();
+                $middlewareClass::handle();
+            }
+        };
+
+        $routeID = $route->getHandler();
         $splitRoute = explode("@", $routeID);
         $class = new $splitRoute[0];
         $function = $splitRoute[1];

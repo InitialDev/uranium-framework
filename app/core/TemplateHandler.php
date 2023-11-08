@@ -8,7 +8,7 @@ class TemplateHandler{
 
     public static function getContent($VIEWNAME, $VARIABLES){
         $viewpath = self::$viewpath;
-        $file = $viewpath.$VIEWNAME.'.view.php';
+        $file = $viewpath.$VIEWNAME;
         if(!file_exists($file)){
             return false;
         }
@@ -35,7 +35,7 @@ class TemplateHandler{
         return str_replace(array_keys($values), array_values($values), $VIEWDATA);
     }
 
-    public static function renderTemplate($newData){
+    public static function renderTemplate($newData, $VARIABLES){
         $templateEx = "/\@[template]+\([\"\'][a-zA-Z0-9\/\_\.\-]+[\"\']\)/";
         preg_match($templateEx, $newData, $match);
         if(count($match) > 0){
@@ -47,7 +47,12 @@ class TemplateHandler{
             $filename =  substr($templateFile[0], 1, strlen($templateFile[0])-2);
             $fileLoc = self::$viewpath.$filename;
             $templaterawcontent = file_get_contents($fileLoc);
-            $templateContent = self::insertIncludes($templaterawcontent);
+
+            // Insert includes for page
+            $newData = self::insertIncludes($newData, $VARIABLES);
+            // Insert includes for template
+            $templateContent = self::insertIncludes($templaterawcontent, $VARIABLES);
+            
             $readyForData = str_replace($template, "", $newData);
             $new_file = str_replace("@content@", $readyForData, $templateContent);
             return $new_file;
@@ -56,15 +61,14 @@ class TemplateHandler{
         }
     }
 
-    private static function insertIncludes($CONTENT){
+    private static function insertIncludes($CONTENT, $VARIABLES){
         $insertEx = "/\@[include]+\([\"\'][a-zA-Z0-9\-\_\/\.]+[\"\']\)/";
         preg_match_all($insertEx, $CONTENT, $inclusions);
         foreach($inclusions[0] as $include){
             preg_match("/[\"\'][a-zA-Z0-9\/\_\-\.]+[\"\']/", $include, $includeFile);
             $fileRelPath = substr($includeFile[0], 1, strlen($includeFile[0])-2);
-            $fileLoc = self::$viewpath.$fileRelPath;
-            $fileContent = file_get_contents($fileLoc);
-            $includeIncludes = self::insertIncludes($fileContent);
+            $fileContent = self::getContent($fileRelPath, $VARIABLES);
+            $includeIncludes = self::insertIncludes($fileContent, $VARIABLES);
             $CONTENT = str_replace($include, $includeIncludes, $CONTENT);
         }
         return $CONTENT;

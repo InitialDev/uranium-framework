@@ -2,7 +2,7 @@
 
 require __DIR__."/app/app.php";
 
-use uranium\cli\cliCommandHandler;
+use uranium\core\cli\cliCommandHandler;
 
 try{
     $cmdHandler = new cliCommandHandler($argv);
