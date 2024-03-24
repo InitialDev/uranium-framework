@@ -5,6 +5,7 @@ namespace uranium\cli;
 use uranium\core\ClassHelper;
 use uranium\core\cli\CliHelper;
 use uranium\core\cli\CliColour;
+use uranium\core\DatabaseSeeder;
 
 class Database{
     /**
@@ -35,7 +36,8 @@ class Database{
      * @param Boolean - output styled report or array of results
      * @return void
      */
-    public static function check(bool $cliReport = true): void{
+    public static function check(): void{
+        $cliReport = true;
         echo "[*] === Verifying database ===".PHP_EOL;
         echo "[*] Reading models...".PHP_EOL;
         echo PHP_EOL;
@@ -52,11 +54,13 @@ class Database{
                     if($a["name"] == $b["Field"]){
                         $report["exists"] = true;
                         $modelTypeString = $a["type"]["ID"]."(".$a["length"].")";
+                        error_log(strtoupper($b["Type"])." - ".strtoupper($modelTypeString));
                         $report["type"] = (strtoupper($b["Type"]) === strtoupper($modelTypeString));
                         $report["null"] = ($a["null"] === false && $b["Null"] === "NO" || 
                                             $a["null"] === true && $b["Null"] === "YES");
                         $report["default"] = ($a["default"] === $b["Default"] || 
                                             $a["default"] === "" && $b["Default"] === NULL);
+                        error_log($a["key"]." - ".$b["Key"]);
                         $report["key"] = ($a["key"] === $b["Key"]);
                         $report["extra"] = (strtoupper($a["extra"]) === strtoupper($b["Extra"]));
                     }
@@ -99,4 +103,12 @@ class Database{
             echo $tableResult;
         };
     }
+
+    public static function seed($args){
+        $seeders = DatabaseSeeder::getSeeders();
+        foreach($seeders as $seeder){
+            DatabaseSeeder::seedTable($seeder);
+        };
+    }
+
 }
