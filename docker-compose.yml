@@ -16,7 +16,14 @@ services:
     image: "mysql"
     volumes:
       - ./database:/var/lib/mysql
+    ports:
+      - "6033:3306"
     environment:
       MYSQL_ROOT_PASSWORD: uran1um
       MYSQL_DATABASE: uranium
-
+  cache:
+    container_name: uraniumCache
+    image: 'memcached'
+    ports:
+      - "11211:11211"
+    restart: always
