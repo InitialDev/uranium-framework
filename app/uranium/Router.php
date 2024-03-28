@@ -3,6 +3,7 @@ namespace uranium\core;
 
 use uranium\core\routes;
 use uranium\controller;
+use uranium\core\pageHandler;
 
 class Router{
 
@@ -11,8 +12,8 @@ class Router{
         if($route){
             self::loadRoute($route["route"], $route['variables']);
         }else{
-            echo "404";
             error_log("[*] Router: Route not found");
+            PageHandler::view("error_pages/404");
         }
     }
 

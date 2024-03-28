@@ -199,11 +199,20 @@ class Model extends DatabaseDataTypes{
         return $this;
     }
 
+    public function get(){
+        // TODO: Check if cache is enabled for model
+        //       check if we have data in cache
+        //       check if cache has expired
+        //       return from cache
+        // ELSE
+        return $this->fetchFromDatabase();
+    }
+
     /**
      * Fetch item in database
      * @return mixed
      */
-    public function get(){
+    public function fetchFromDatabase(){
         $tableName = $this->tableName;
         $sql = "SELECT ";
         $cols = $this->getColumnNames();
