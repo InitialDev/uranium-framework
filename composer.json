@@ -5,7 +5,7 @@
     "type": "project",
     "autoload": {
         "classmap": [
-            "app/core/"
+            "app/uranium/"
         ]
     },
     "scripts": {

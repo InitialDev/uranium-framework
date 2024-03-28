@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 use PHPUnit\Framework\TestCase;
 
-require(__DIR__."/../app/core/Model.php");
+require(__DIR__."/../app/uranium/Model.php");
 require(__DIR__."/../models/UserModel.php");
 
 use uranium\core\Model;
@@ -37,7 +37,7 @@ final class ModelTest extends TestCase{
         $model1 = new UserModel();
         $model1->test = true;
         $sql1 = $model1->whereAnd(["username"=>"test", "email"=>"anotherValue"])->get();
-        $expected = "SELECT id, username, email FROM user WHERE `username`='test' AND `email`='anotherValue'";
+        $expected = "SELECT id, username, active FROM User WHERE username = :username  AND email = :email ";
         $this->assertSame($expected, $sql1);
 
         $model2 = new UserModel();
