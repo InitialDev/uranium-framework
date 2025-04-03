@@ -46,14 +46,12 @@ class TemplateHandler{
 			};
             $filename =  substr($templateFile[0], 1, strlen($templateFile[0])-2);
             $fileLoc = self::$viewpath.$filename;
-            $templaterawcontent = file_get_contents($fileLoc);
-
+            $templaterawcontent = self::getContent($filename, $VARIABLES);
             // Insert includes for page
             $newData = self::insertIncludes($newData, $VARIABLES);
+            $readyForData = str_replace($template, "", $newData);
             // Insert includes for template
             $templateContent = self::insertIncludes($templaterawcontent, $VARIABLES);
-            
-            $readyForData = str_replace($template, "", $newData);
             $new_file = str_replace("@content@", $readyForData, $templateContent);
             return $new_file;
         }else{
