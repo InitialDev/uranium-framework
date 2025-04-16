@@ -53,7 +53,7 @@ class UserHandler{
 
     public static function getAuthenticatedUserSessions(){
         $user = self::getAuthenticatedUser();
-        $userId = $user["id"];
+        $userId = $user->getUserId();
         $sessionModel = new Session();
         $sessions = $sessionModel->where("userId", $userId)->get()->getResults();
         return $sessions;

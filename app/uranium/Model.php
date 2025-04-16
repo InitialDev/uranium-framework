@@ -24,6 +24,7 @@ class Model extends DatabaseDataTypes{
     public $rows = array(); 	// Array of data from database
     protected $tableName;	
     protected $pkn;				// Primary key name
+    protected $allowCache = false;
     private $withProtected = false; 
     private	$query = ["selectors" => array(),
                       "relationships" => array()];		// Build a query
@@ -119,8 +120,25 @@ class Model extends DatabaseDataTypes{
         return $this;
     }
 
+    /**
+     * Get query selectors for this instance
+     * @return Array of selector strings and values
+     */
     public function getSelectors(): Array{
         return $this->query["selectors"];
+    }
+
+    /**
+     * Update timestamp of a database col/row
+     * @param Column name to update timestamp
+     */
+    public function updateTimestamp(String $colName):Void {
+        $selectors = $this->getSelectors();
+        $template = "UPDATE ".$this->tableName." SET ".$colName." = CURRENT_TIMESTAMP";
+        $selectorBuild = $this->buildSelectorString();
+        $wheres = $selectorBuild["variables"];
+        $template .= $selectorBuild["sql"];
+
     }
 
     /**
@@ -199,13 +217,54 @@ class Model extends DatabaseDataTypes{
         return $this;
     }
 
-    public function get(){
-        // TODO: Check if cache is enabled for model
-        //       check if we have data in cache
-        //       check if cache has expired
-        //       return from cache
-        // ELSE
-        return $this->fetchFromDatabase();
+    public function get(bool $useCache=false) {
+        $rows = null;
+        if ($useCache && $this->allowCache) {
+            $rows = $this->fetchFromCache();
+        };
+        if($rows == null) {
+            $rows = $this->fetchFromDatabase();
+        };
+        $this->rows[] = $rows;
+        return $this;
+    }
+
+    public function fetchFromCache():Mixed {
+        $cacheSelector = $this->buildCacheSelector();
+        $responseRows = null;
+        if ($cacheSelector != null) {
+            $responseRows[] = Cache::get($cacheSelector);
+        };
+        return $responseRows;
+    }
+
+    public function buildCacheSelector():Mixed {
+        $results = [];
+        $tableName = $this->tableName;
+        $selectors = $this->getSelectors();
+        if (!array_key_exists($this->pkn, $selectors)) {
+            return null;
+        };
+        return $tableName."_".$selectors["id"];
+    }
+
+    public function buildSelectorString(){
+        $sql = "";
+        $wheres = [];
+        if(count($this->query["selectors"]) > 0){
+            $sql .= " WHERE ";
+            foreach($this->query["selectors"] as $key=>$selector){
+                $wheres[$selector["key"]] = $selector["value"];
+                if($key >= 1)
+                    $sql .= " AND ";
+                $sql .= "`".$selector["key"]."`=:".$selector["key"]." ";
+            };
+        };
+
+        return [
+            "variables" => $wheres,
+            "sql"       => $sql
+        ];
     }
 
     /**
@@ -216,6 +275,7 @@ class Model extends DatabaseDataTypes{
         $tableName = $this->tableName;
         $sql = "SELECT ";
         $cols = $this->getColumnNames();
+        $responseRows = null;
         $wheres = [];
         foreach($cols as $key=>$col){
             $sql .= "`".$col."`";
@@ -224,15 +284,11 @@ class Model extends DatabaseDataTypes{
             };
         };
         $sql .= " FROM $tableName";
-        if(count($this->query["selectors"]) > 0){
-            $sql .= " WHERE ";
-            foreach($this->query["selectors"] as $key=>$selector){
-                $wheres[$selector["key"]] = $selector["value"];
-                if($key >= 1)
-                    $sql .= " AND ";
-                $sql .= "`".$selector["key"]."`=:".$selector["key"]." ";
-            };
-        };
+
+        $selectorBuild = $this->buildSelectorString();
+        $wheres = $selectorBuild["variables"];
+        $sql .= $selectorBuild["sql"];
+
         if(key_exists("limit", $this->query)){
             $sql .= " LIMIT ".$this->query["limit"];
         };
@@ -251,13 +307,13 @@ class Model extends DatabaseDataTypes{
                                 $row[$relationshipModel->tableName] = $results;
                             };
                         };
-                        $this->rows[] = $row;
+                        $responseRows = $row;
                     };
                 };
             }catch(PDOException $e){
                 echo "Error";
             }
-            return $this;
+            return $responseRows;
         }else{
             return $sql;
         };
@@ -333,10 +389,15 @@ class Model extends DatabaseDataTypes{
                     if(array_key_exists($col["name"], $row)){
                         $currentKey = $col["name"];
                         $currentValue = $row[$col["name"]];
-                        $template .= "`$currentKey`=?";
-                        $variables[] = $currentValue;
-                    }
-                }
+
+                        if($col["type"]["ID"] == "TIMESTAMP" ){
+                            $template .= "`$currentKey`=CURRENT_TIMESTAMP,";
+                        }else{
+                            $template .= "`$currentKey`=?,";
+                            $variables[] = $currentValue;
+                        };
+                    };
+                };
                 $template = substr($template, 0, -1);
                 $currentPK = $row[$pkn];
                 $template .= " WHERE `$pkn`='$currentPK'";
@@ -345,15 +406,19 @@ class Model extends DatabaseDataTypes{
                 $template = "INSERT INTO `$tableName` (";
                 foreach($this->cols as $col){
                     if($col["key"] != "PRI"){
-                        if(array_Key_exists($col["name"], $row)){
+                        if(array_Key_exists($col["name"], $row) || $col["type"]["ID"] == "TIMESTAMP"){
                             $currentKey = $col["name"];
-                            $currentValue = $row[$col["name"]];
                             $template .= "`$currentKey`,";
-                            $values .= "?,";
-                            $variables[] = $currentValue;
-                        }
-                    }
-                }
+                            if($col["type"]["ID"] == "TIMESTAMP" ){
+                                $values .= "CURRENT_TIMESTAMP,";
+                            }else{
+                                $values .= "?,";
+                                $currentValue = $row[$col["name"]];
+                                $variables[] = $currentValue;
+                            };
+                        };
+                    };
+                };
                 $template = substr($template, 0, -1); // Remove the final comma from keys
                 $values = substr($values, 0, -1); // And on values
                 $template .= ") VALUES (".$values.");";

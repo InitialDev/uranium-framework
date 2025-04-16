@@ -12,7 +12,12 @@ class TemplateHandler{
         if(!file_exists($file)){
             return false;
         }
-        extract($VARIABLES);
+        $config = ConfigHandler::getInstance();
+        $VARIABLES["sitename"] = $config->getValue("sitename");
+        $data = [
+            "page" => $VARIABLES
+        ];
+        extract($data);
         ob_start();
         include($file);
         $viewContent=ob_get_contents(); 
@@ -25,7 +30,13 @@ class TemplateHandler{
         preg_match_all($match, $VIEWDATA, $matches);
         $update = $matches[0];
         $values = [];
-        extract($VARIABLES);
+        // add site meta from config
+        $config = ConfigHandler::getInstance();
+        $VARIABLES["sitename"] = $config->getValue("sitename");
+        $data = [
+            "page" => $VARIABLES
+        ];
+        extract($data);
         foreach($update as $change){
             $command = substr($change, 2, strlen($change)-4);
             $output = "";

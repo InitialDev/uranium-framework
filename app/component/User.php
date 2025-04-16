@@ -4,6 +4,7 @@ namespace uranium\component;
 
 use uranium\model\UserAttributeModel;
 use uranium\model\UserModel;
+use uranium\model\NotificationModel;
 
 class User{
     private $_user_id;
@@ -11,6 +12,26 @@ class User{
 
     public function __construct($user_id){
         $this->_user_id = $user_id;
+    }
+
+    public function getUserId(){
+        return $this->_user_id;
+    }
+
+    public function getSessionCount(){
+        $sessions = UserHandler::getAuthenticatedUserSessions();
+        return count($sessions);
+    }
+
+    public function getNotifications(){
+        $notificationModel = new NotificationModel();
+        $notifications = $notificationModel->where("userId", $this->_user_id)->get()->getResults();
+        return $notifications;
+    }
+
+    public function getNotificationCount(){
+        $notifications = $this->getNotifications();
+        return count($notifications);
     }
 
     public function getUsername():String {
@@ -35,10 +56,6 @@ class User{
     }
 
     public function isActive(){
-    
-    }
-
-    public function getRank(){
     
     }
 
